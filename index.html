@@ -117,16 +117,17 @@
     <p>El pipeline implementado se divide en tres etapas: validación con imágenes sintéticas, registro de imágenes reales del comedor, y calibración/medición sobre la panorámica resultante. A grandes rasgos:</p>
     <ol>
       <li><strong>Exploración:</strong> Nuestro pipeline implementa pasos concretos y reproducibles:
-        <ol>
+        <ul>
           <li>Inventariado de imágenes por split y clase con list_images_by_split_and_class, que acepta extensiones comunes.</li>
           <li>Inspección visual mediante show_examples (actualmente mostrando hasta 3 primeros archivos por clase).</li>
           <li>Conteo de tamaños y creación de df_counts mediante size_counter.</li>
           <li>Preprocesamiento masivo invocando preprocess_image_save(in_path, out_path, size=(224,224), apply_clahe=True) que convierte a grayscale, aplica CLAHE y redimensiona con cv2.INTER_AREA, guardando registros en df_processed y exportándolos a OUTPUT_TABLES / 'part1_processed_files.csv'.</li>
           <li>Comparativa entre el dataset antes y despues del preprocesamiento.</li>
-        </ol>
+        </ul>
       </li>
       <li><strong>Descriptores de Forma:</strong> En esta parte del taller implementé tres tipos de descriptores de forma: HOG, Momentos de Hu y medidas geométricas del contorno (área, perímetro, circularidad y excentricidad). El objetivo era obtener una representación numérica que capturara la estructura general de las imágenes de rayos X y que fuera útil en procesos posteriores de clasificación.
-        <ol>
+        
+        <ul>
           <li><strong>HOG:</strong> Los valores obtenidos para HOG forman vectores de alta dimensión. Esto es normal porque HOG divide la imagen en pequeñas celdas y calcula la orientación de los gradientes en cada una. Al ver los resultados, pude notar que muchas de las componentes tienen valores pequeños cercanos a cero, mientras que otras presentan valores más altos. Esto indica que:
             <ul>
               <li>La imagen tiene regiones suaves (pocos gradientes).</li>
@@ -151,18 +152,18 @@
               <li>La excentricidad es relativamente alta (≈0.6-0.7), lo cual indica que la forma es claramente elíptica y verticalmente extendida.</li>
             </ul>
           </li>
-        </ol>
+        </ul>
       </li>
       <li><strong>Descriptores de Textura:</strong> Para esta etapa se utilizaron las imágenes previamente normalizadas y procesadas (224×224 px, escala de grises y CLAHE). Sobre cada una se aplicaron cuatro familias de descriptores de textura ampliamente utilizadas en reconocimiento de patrones: LBP, GLCM, filtros de Gabor y estadísticas de primer orden. Cada conjunto aporta información complementaria, permitiendo caracterizar variaciones locales, relaciones espaciales y propiedades estadísticas globales de las imágenes.
-        <ol>
+        <ul>
           <li><strong>LBP:</strong> Se aplicó el operador LBP para capturar variaciones locales de textura mediante el análisis de patrones binarios en torno a cada píxel. Luego se construyó un histograma normalizado del mapa resultante, el cual se utilizó como descriptor principal.</li>
           <li><strong>GLCM:</strong> Se calcularon matrices de co-ocurrencia considerando diferentes orientaciones y una distancia fija. A partir de estas matrices se extrajeron las medidas texturales clásicas: contraste, correlación, energía y homogeneidad, obteniendo un resumen de las relaciones espaciales entre intensidades.</li>
           <li><strong>Filtros de Gabor:</strong> Se utilizó un banco de filtros de Gabor con varias frecuencias y orientaciones. Estos filtros permiten capturar texturas orientadas y patrones repetitivos. Para cada respuesta filtrada se extrajeron estadísticas simples (media y desviación estándar) como representación compacta.</li>
           <li><strong>Estadisticas de primer orden:</strong> Se calcularon medidas derivadas directamente del histograma de intensidades: media, varianza, skewness, kurtosis y entropía. Estas propiedades describen el brillo, el contraste y la distribución global de intensidades en la imagen</li>
-        </ol>
+        </ul>
       </li>
       <li><strong>Clasificación de Imágenes:</strong> 
-        <ol>
+        <ul>
           <li><strong>Conjunto de datos y preprocesamiento:</strong> El conjunto de datos utilizado corresponde a imágenes pertenecientes a dos clases (NORMAL y PNEUMONIA). Para garantizar consistencia en el procesamiento, todas las imágenes fueron sometidas a las siguientes etapas:
             <ul>
               <li>Conversión a escala de grises.</li>
@@ -196,7 +197,7 @@
             </ul>
             <p>Estas métricas permiten comparar el desempeño de cada clasificador bajo las mismas condiciones experimentales.</p>
           </li>
-        </ol>
+        </ul>
       </li>
     </ol>
 
@@ -205,7 +206,7 @@
     <p>Los artefactos de salida en nuestra exploración son la fuente directa de resultados: la tabla df_counts (class_counts_by_split.csv) resume el desbalance por split/clase; las figuras de histograma generadas a partir de size_counter documentan la dispersión de anchuras/alturas; y df_processed (part1_processed_files.csv) permite calcular la tasa de éxito del procesamiento y agrupar por split/class para obtener processed_counts_by_split.csv. </p>
 
     <div class="figure">
-      <img src= "\proyecto-imagenes-medicas\resultados\exploracion\figures\scatter_entropy_before_after.png" />
+      <img src= "VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/exploracion/figures/scatter_entropy_before_after.png" />
       <div class="caption">Ilustración 1. Entropía de las imagenes antes y despues de pre-procesadas.</div>
     </div>
 
@@ -237,7 +238,7 @@
     <p>La extracción de descriptores de forma reveló que las radiografías de tórax poseen patrones estructurales consistentes, pero con variaciones suficientes para que los descriptores capturen información relevante. HOG ofrece un nivel de detalle muy alto y sensible a los bordes, ideal para detectar texturas o cambios producidos por neumonía. Los Momentos de Hu, aunque muy pequeños, reflejan características globales estables y permiten comparar formas independientemente del tamaño o la orientación. Finalmente, los descriptores geométricos del contorno complementan la representación describiendo la forma general del área segmentada.</p>
 
     <div class="figure">
-      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/descriptores_forma/figures/PNEUMONIA_descriptores_forma.png" />
       <div class="caption">Ilustración 2. Algunos descriptores de forma sobre una imagen procesada.</div>
     </div>
 
@@ -249,7 +250,7 @@
     <p>Los histogramas de LBP mostraron que varios patrones locales son más frecuentes en las imágenes de neumonía, con incrementos visibles en bins de alta variabilidad. Por ejemplo, los descriptores lbp_4 y lbp_5 presentaron una media mayor en PNEUMONIA (≈0.26 y 0.17) frente a NORMAL (≈0.23 y 0.15), evidenciando texturas más irregulares.</p>
     
     <div class="figure">
-      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/matches_1_2.png" alt="Emparejamiento de características" />
+      <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/descriptores_textura/figures/lbp_histograms.png" />
       <div class="caption">Ilustración 3. Histogramas de LBP.</div>
     </div>
 
@@ -257,14 +258,14 @@
     
     <p>Estas diferencias reflejan mayor desorden y pérdida de uniformidad en los pulmones afectados.</p>
     <div class="figure">
-      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/descriptores_textura/figures/glcm_comparison_normal_vs_pneumonia.png" />
       <div class="caption">Ilustración 4. Descriptores GLCM.</div>
     </div>
 
     <p>Los boxplots de filtros Gabor confirmaron esta tendencia. En varias orientaciones y frecuencias, las respuestas promedio (gabor_mean) fueron mayores en PNEUMONIA, con picos entre 800 y 1200 en los primeros filtros, mientras que en NORMAL se mantuvieron más bajas y con menor dispersión. Del mismo modo, las desviaciones estándar fueron consistentemente mayores en PNEUMONIA, indicando estructuras más complejas.</p>
 
     <div class="figure">
-      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/descriptores_textura/figures/gabor_boxplots.png" />
       <div class="caption">Ilustración 5. Boxplots de filtros de Gabor</div>
     </div>
 
@@ -277,7 +278,7 @@
     <p>Finalmente, el mapa de correlación mostró que los descriptores LBP, GLCM, Gabor y los estadísticos globales no son redundantes: cada grupo captura propiedades distintas del tejido pulmonar, lo cual es valioso para la etapa de clasificación.</p>
     
      <div class="figure">
-      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/descriptores_textura/figures/heatmap_correlacion.png" />
       <div class="caption">Ilustración 6. Heatmap entre descriptores.</div>
     </div>
     
@@ -330,14 +331,14 @@
         <li>Matrices de confusión:
           <p>El SVM RBF muestra un desempeño sólido con una ligera tendencia a confundir algunos casos de NORMAL como PNEUMONIA (19 errores). Sin embargo, mantiene un número muy bajo de falsos negativos en la clase PNEUMONIA (15), lo cual es coherente con su recall superior. En aplicaciones clínicas, este comportamiento es positivo, ya que reduce la probabilidad de no detectar un caso real de neumonía.</p>
            <div class="figure">
-              <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/measurements_overlay.png" alt="Algunas mediciones" />
-              <div class="caption">Ilustración 6. Matriz confusión del modelo SVM RBF.</div>
+              <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/models/figures/SVM_RBF_confusion_matrix.png" />
+              <div class="caption">Ilustración 7. Matriz confusión del modelo SVM RBF.</div>
             </div>
             
           <p>El SVM lineal muestra un comportamiento extremadamente similar al modelo RBF, aunque mejora ligeramente en la clasificación de la clase NORMAL (solo 17 errores). En PNEUMONIA, comete un error más que el RBF (16 vs. 15), lo cual es acorde con su recall ligeramente menor.</p>
             <div class="figure">
-              <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/measurements_overlay.png" alt="Algunas mediciones" />
-              <div class="caption">Ilustración 7. Matriz confusión del modelo SVM Lineal.</div>
+              <img src="VisionPorComputador-trabajo_03/proyecto-imagenes-medicas/resultados/models/figures/SVM_Polynomial_confusion_matrix.png" />
+              <div class="caption">Ilustración 8. Matriz confusión del modelo SVM Lineal.</div>
             </div>
         </li>
       </ul>
@@ -422,46 +423,7 @@
       }
     });
 
-    // --- Gráfica de validación (Chart.js) ---
-    (function(){
-      const labels = ['Caso 1','Caso 2','Caso 3','Caso 4'];
-      const scaleGT = [1.00,1.02,0.95,1.15];
-      const scaleEst = [1.00,1.01,0.95,1.14];
-      const rotGT = [0,10,-12.5,25];
-      const rotEst = [0,9.95,-12.48,24.98];
-
-      const ctx = document.getElementById('validationChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            { label: 'Escala (GT)', data: scaleGT, tension:0.2 },
-            { label: 'Escala (Est.)', data: scaleEst, tension:0.2 },
-            { label: 'Rotación GT (°)', data: rotGT, tension:0.2, hidden:true },
-            { label: 'Rotación Est. (°)', data: rotEst, tension:0.2, hidden:true }
-          ]
-        },
-        options: {
-          responsive:true,
-          interaction:{ mode:'index', intersect:false },
-          plugins:{ legend:{ position:'top' }, title:{ display:true, text:'Validación: Escala y Rotación (GT vs Est.)' } },
-          scales: {
-            y: { beginAtZero:false }
-          }
-        }
-      });
-
-      // --- Gráfica de mediciones ---
-      const measureLabels = ['Cuadro','Mesa','Ventana','Silla','Planta'];
-      const measureMeters = [1.17,0.582,0.432,0.659,0.411];
-      const ctx2 = document.getElementById('measureChart').getContext('2d');
-      new Chart(ctx2, {
-        type:'bar',
-        data:{ labels:measureLabels, datasets:[{ label:'Medición (m)', data:measureMeters }] },
-        options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Mediciones estimadas en la panorámica (m)' } }, scales:{ y:{ beginAtZero:true } } }
-      });
-    })();
+    
   </script>
 </body>
 </html>
