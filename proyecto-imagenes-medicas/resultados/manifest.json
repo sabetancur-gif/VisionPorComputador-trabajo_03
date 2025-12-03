@@ -1,0 +1,25 @@
+{
+  "figures": [
+    "exploracion/figures/boxplots_entropy_localstd.png",
+    "exploracion/figures/hist_intensity_before_after.png",
+    "exploracion/figures/sample_pairs_before_after.png",
+    "exploracion/figures/scatter_entropy_before_after.png",
+    "descriptores_forma/figures/PNEUMONIA_descriptores_forma.png",
+    "descriptores_textura/figures/gabor_boxplots.png",
+    "descriptores_textura/figures/lbp_histograms.png",
+    "descriptores_textura/figures/heatmap_correlacion.png",
+    "descriptores_textura/figures/glcm_comparison_normal_vs_pneumonia.png"
+  ],
+  "tables": [
+    "exploracion/tables/before_after.csv",
+    "exploracion/tables/class_counts_by_split.csv",
+    "exploracion/tables/part1_processed_files.csv",
+    "exploracion/tables/processed_counts_by_split.csv",
+    "descriptores_forma/tables/part2_a_processed_files.csv",
+    "descriptores_textura/tables/texture_features.csv",
+    "models/tables/resultados_cv_models.csv"
+  ],
+  "models": [
+    "models/best_chest_cnn.pth"
+  ]
+}

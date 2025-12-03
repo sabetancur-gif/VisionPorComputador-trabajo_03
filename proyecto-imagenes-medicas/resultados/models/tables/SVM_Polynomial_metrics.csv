@@ -1,0 +1,2 @@
+Modelo,Accuracy,Precision,Recall,F1-score,AUC-ROC
+SVM_Polynomial,0.9375,0.8888888888888888,1.0,0.9411764705882353,1.0

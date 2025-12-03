@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taller 2: Fusión de Perspectivas - Registro y Medición</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js para gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --accent: #0ea5a4;
+      --bg: #f8f9fb;
+      --text: #0f172a;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: 260px; height: 100%;
+      background: var(--card); box-shadow: var(--shadow); padding: 1.5rem;
+      transition: transform 0.3s ease-in-out; z-index: 200; overflow:auto;
+    }
+
+    .sidebar h2 { font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+    .sidebar nav a { display:flex; align-items:center; gap:0.6rem; text-decoration:none; color:var(--text); padding:0.5rem 0.8rem; border-radius:8px; transition: all 0.2s ease; font-weight:500; }
+    .sidebar nav a:hover { background:var(--accent); color:white; transform: translateX(4px); }
+
+    /* HAMBURGER */
+    .hamburger { position: fixed; top: 1rem; left: 1rem; background: var(--card); border: none; box-shadow: var(--shadow); border-radius: 10px; padding: 0.6rem; cursor: pointer; z-index: 300; display: flex; align-items: center; justify-content: center; }
+    .hamburger:hover { background:var(--accent); color:white; }
+
+    /* MAIN */
+    main { margin-left: 260px; padding: 2rem 3rem; max-width: 980px; width: 100%; transition: margin-left 0.3s ease-in-out; }
+    main.collapsed { margin-left: 0; }
+
+    h1 { font-size: 1.9rem; font-weight:700; margin-bottom: 0.5rem; color: var(--accent); }
+    h2 { font-size: 1.4rem; font-weight:600; margin-top: 2.5rem; margin-bottom: 1rem; color:var(--text); border-bottom:2px solid var(--accent); display:inline-block; padding-bottom:0.3rem; }
+    h3 { font-size:1.1rem; margin-top:1.4rem; margin-bottom:0.5rem; font-weight:600; color:var(--text); }
+    p { margin-bottom:1rem; text-align:justify; }
+    ul, ol { margin-left:1.5rem; margin-bottom:1rem; }
+    li { margin-bottom:0.5rem; }
+    .figure { background:var(--card); padding:0.75rem; border-radius:8px; box-shadow:var(--shadow); margin:1rem 0; }
+    .figure img { max-width:100%; height:auto; display:block; margin:0 auto; }
+    .caption { font-size:0.9rem; color:var(--muted); text-align:center; margin-top:0.5rem; }
+    table { width:100%; border-collapse:collapse; margin:1rem 0; background:var(--card); box-shadow:var(--shadow); }
+    th, td { padding:0.6rem; border-bottom:1px solid #eee; text-align:left; }
+    th { background:#f1f5f4; }
+    .kpi { display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem; }
+    .kpi .card { padding:0.8rem 1rem; border-radius:10px; background:var(--card); box-shadow:var(--shadow); min-width:140px; }
+    @media (max-width:900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      main { margin-left:0; padding:1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón hamburguesa -->
+  <button class="hamburger" id="menuBtn" aria-label="Abrir menú">
+    <i data-lucide="menu"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <h2>Contenido</h2>
+    <nav>
+      <a href="#introduccion"><i data-lucide="book-open"></i> Introducción</a>
+      <a href="#marco"><i data-lucide="layers"></i> Marco teórico</a>
+      <a href="#metodologia"><i data-lucide="flask-round"></i> Metodología</a>
+      <a href="#experimentos"><i data-lucide="settings"></i> Experimentos</a>
+      <a href="#resultados"><i data-lucide="bar-chart-3"></i> Resultados</a>
+      <a href="#analisis"><i data-lucide="search"></i> Análisis</a>
+      <a href="#conclusiones"><i data-lucide="check-circle"></i> Conclusiones</a>
+      <a href="#contribucion"><i data-lucide="users"></i> Contribución</a>
+      <a href="#referencias"><i data-lucide="book"></i> Referencias</a>
+    </nav>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main id="main">
+    <h1>Trabajo 3: Clasificación de Imágenes Médicas con Descriptores Clásicos vs. Deep Learning</h1>
+    <p><strong>Visión por Computador</strong><br>
+    <strong>Universidad Nacional de Colombia</strong><br>
+    <strong>Docente:</strong> Juan David Ospina Arango<br>
+    <strong>Estudiantes:</strong></p>
+    <ul>
+      <li>Santiago Betancur Montoya</li>
+      <li>Reinaldo David Lopez Narvaez</li>
+      <li>Jose Sebastian Garzon Parra</li>
+      <li>Monica Paola Vargas Tirado</li>
+    </ul>
+
+    <h2 id="introduccion">Introducción</h2>
+    <p>El análisis automatizado de imágenes médicas se ha consolidado como una herramienta fundamental en la detección temprana de patologías, gracias a los avances en visión por computador y aprendizaje automático. Radiografías de tórax, una de las modalidades más utilizadas en el diagnóstico clínico, requieren procesos rigurosos de preparación, inspección y caracterización para garantizar la validez de los modelos que las analizan. Desde la organización y verificación preliminar del dataset hasta la extracción de descriptores y el uso de algoritmos de clasificación, cada etapa del pipeline contribuye a construir sistemas más precisos, reproducibles y confiables. Este marco teórico presenta los conceptos esenciales que sustentan dichas etapas y permiten comprender cómo las técnicas de preprocesamiento, los descriptores de forma y textura, y los modelos de aprendizaje clásico y profundo interactúan para facilitar la interpretación computacional de imágenes radiológicas.</p>
+
+    <h2 id="marco">Marco teórico</h2>
+    <p>El análisis automatizado de radiografías inicia con una etapa fundamental de inspección, organización y preprocesamiento del dataset. La revisión visual inicial —incluyendo resolución, relación de aspecto e histogramas— permite identificar inconsistencias, artefactos o sesgos que podrían comprometer el entrenamiento. Técnicas como CLAHE optimizan el contraste local de las radiografías, facilitando la detección de patrones relevantes sin alterar la estructura anatómica. Esta fase también incluye la correcta partición en conjuntos de entrenamiento, validación y prueba, garantizando reproducibilidad y trazabilidad mediante el registro estructurado de los archivos procesados.</p>
+    <p>La segunda etapa corresponde a la extracción de descriptores de forma y textura, esenciales cuando se emplean modelos clásicos de clasificación. Métodos como LBP, GLCM, filtros de Gabor y estadísticas de primer orden permiten transformar características visuales del tejido pulmonar en vectores numéricos interpretables por algoritmos. Cada descriptor captura información complementaria sobre patrones locales, relaciones espaciales e información frecuencial, lo que facilita representar anomalías asociadas a patologías respiratorias de manera robusta y comparativa.</p>
+    <p>Finalmente, la tercera etapa se centra en la clasificación de las imágenes, ya sea mediante modelos clásicos o mediante aprendizaje profundo. Los clasificadores tradicionales, como SVM, Random Forest, k-NN o regresión logística, operan sobre vectores de características previamente extraídos. En contraste, las redes neuronales convolucionales aprenden automáticamente representaciones jerárquicas directamente de los píxeles, convirtiéndose en el enfoque dominante para tareas de visión por su capacidad para identificar patrones complejos. Esta fase integra toda la información generada en etapas anteriores y permite evaluar el desempeño general del sistema de diagnóstico automatizado.</p>
+
+
+    <h2 id="metodologia">Metodología</h2>
+    <p>El pipeline implementado se divide en tres etapas: validación con imágenes sintéticas, registro de imágenes reales del comedor, y calibración/medición sobre la panorámica resultante. A grandes rasgos:</p>
+    <ol>
+      <li><strong>Exploración:</strong> Nuestro pipeline implementa pasos concretos y reproducibles:
+        <ol>
+          <li>Inventariado de imágenes por split y clase con list_images_by_split_and_class, que acepta extensiones comunes.</li>
+          <li>Inspección visual mediante show_examples (actualmente mostrando hasta 3 primeros archivos por clase).</li>
+          <li>Conteo de tamaños y creación de df_counts mediante size_counter.</li>
+          <li>Preprocesamiento masivo invocando preprocess_image_save(in_path, out_path, size=(224,224), apply_clahe=True) que convierte a grayscale, aplica CLAHE y redimensiona con cv2.INTER_AREA, guardando registros en df_processed y exportándolos a OUTPUT_TABLES / 'part1_processed_files.csv'.</li>
+          <li>Comparativa entre el dataset antes y despues del preprocesamiento.</li>
+        </ol>
+      </li>
+      <li><strong>Descriptores de Forma:</strong> En esta parte del taller implementé tres tipos de descriptores de forma: HOG, Momentos de Hu y medidas geométricas del contorno (área, perímetro, circularidad y excentricidad). El objetivo era obtener una representación numérica que capturara la estructura general de las imágenes de rayos X y que fuera útil en procesos posteriores de clasificación.
+        <ol>
+          <li><strong>HOG:</strong> Los valores obtenidos para HOG forman vectores de alta dimensión. Esto es normal porque HOG divide la imagen en pequeñas celdas y calcula la orientación de los gradientes en cada una. Al ver los resultados, pude notar que muchas de las componentes tienen valores pequeños cercanos a cero, mientras que otras presentan valores más altos. Esto indica que:
+            <ul>
+              <li>La imagen tiene regiones suaves (pocos gradientes).</li>
+              <li>Pero también tiene zonas con bordes marcados (costillas, silueta del tórax, diafragma).</li>
+              <li>La alta dimensionalidad refleja la cantidad de información estructural que HOG es capaz de capturar.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>HU:</strong> Los 7 Momentos de Hu aparecieron con valores muy pequeños. Esto es totalmente esperado: estos momentos están diseñados para ser invariantes a traslación, rotación y escala, y matemáticamente tienden a producir números diminutos.
+            <ul>
+              <li>Los primeros momentos reflejan la distribución global de la forma torácica.</li>
+              <li>Los valores cercanos entre imágenes indican que la estructura general del tórax cambia poco entre sujetos.</li>
+              <li>Sin embargo, pequeñas diferencias en los momentos de orden superior capturan variaciones más sutiles en simetría o deformaciones del tejido.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Descriptores de contorno:</strong> En este caso medí área, perímetro, circularidad y excentricidad del contorno extraído.
+            <ul>
+              <li>El área ronda valores entre 30.000 y 40.000, lo cual coincide con la proporción ocupada por el tórax en imágenes redimensionadas.</li>
+              <li>El perímetro también varía moderadamente, lo cual tiene sentido porque el contorno del tórax depende de la postura y del recorte.</li>
+              <li>La circularidad es baja (valores cercanos a 0.2-0.3), lo que confirma que el tórax NO es una figura circular sino alargada.</li>
+              <li>La excentricidad es relativamente alta (≈0.6-0.7), lo cual indica que la forma es claramente elíptica y verticalmente extendida.</li>
+            </ul>
+          </li>
+        </ol>
+      </li>
+      <li><strong>Descriptores de Textura:</strong> Para esta etapa se utilizaron las imágenes previamente normalizadas y procesadas (224×224 px, escala de grises y CLAHE). Sobre cada una se aplicaron cuatro familias de descriptores de textura ampliamente utilizadas en reconocimiento de patrones: LBP, GLCM, filtros de Gabor y estadísticas de primer orden. Cada conjunto aporta información complementaria, permitiendo caracterizar variaciones locales, relaciones espaciales y propiedades estadísticas globales de las imágenes.
+        <ol>
+          <li><strong>LBP:</strong> Se aplicó el operador LBP para capturar variaciones locales de textura mediante el análisis de patrones binarios en torno a cada píxel. Luego se construyó un histograma normalizado del mapa resultante, el cual se utilizó como descriptor principal.</li>
+          <li><strong>GLCM:</strong> Se calcularon matrices de co-ocurrencia considerando diferentes orientaciones y una distancia fija. A partir de estas matrices se extrajeron las medidas texturales clásicas: contraste, correlación, energía y homogeneidad, obteniendo un resumen de las relaciones espaciales entre intensidades.</li>
+          <li><strong>Filtros de Gabor:</strong> Se utilizó un banco de filtros de Gabor con varias frecuencias y orientaciones. Estos filtros permiten capturar texturas orientadas y patrones repetitivos. Para cada respuesta filtrada se extrajeron estadísticas simples (media y desviación estándar) como representación compacta.</li>
+          <li><strong>Estadisticas de primer orden:</strong> Se calcularon medidas derivadas directamente del histograma de intensidades: media, varianza, skewness, kurtosis y entropía. Estas propiedades describen el brillo, el contraste y la distribución global de intensidades en la imagen</li>
+        </ol>
+      </li>
+      <li><strong>Clasificación de Imágenes:</strong> 
+        <ol>
+          <li><strong>Conjunto de datos y preprocesamiento:</strong> El conjunto de datos utilizado corresponde a imágenes pertenecientes a dos clases (NORMAL y PNEUMONIA). Para garantizar consistencia en el procesamiento, todas las imágenes fueron sometidas a las siguientes etapas:
+            <ul>
+              <li>Conversión a escala de grises.</li>
+              <li>Redimensionamiento a 256 × 256 píxeles.</li>
+              <li>Normalización de intensidad.</li>
+              <li>División en conjuntos de entrenamiento, validación y prueba.</li>
+            </ul>
+          </li>
+          <li><strong>Extracción de características:</strong> Para los modelos clásicos de machine learning, las imágenes fueron transformadas en vectores de características mediante cuatro descriptores ampliamente utilizados en visión por computador:
+            <ul>
+              <li>Histogram of Oriented Gradients (HOG)</li>
+              <li>Local Binary Patterns (LBP)</li>
+              <li>Gray Level Co-occurrence Matrix (GLCM)</li>
+              <li>Filtros de Gabor</li>
+              <li>Ensamble de características</li>
+            </ul>
+          </li>
+          <li><strong>Modelos clásicos de clasificación:</strong> Se entrenaron cuatro modelos clásicos utilizando los vectores de características previamente extraídos.
+            <ul>
+              <li>Support Vector Machine (SVM)</li>
+              <li>Random Forest</li>
+              <li>k-Nearest Neighbors (k-NN)</li>
+              <li>Regresión Logística</li>
+            </ul>
+          </li>
+          <li><strong>Redes Neuronales Convolucionales (CNNs):</strong> Además de los clasificadores tradicionales, se implementó una Red Neuronal Convolucional inspirada en la arquitectura AlexNet, pero adaptada al tamaño reducido del dataset.
+            <ul>
+              <li>Arquitectura propuesta (CNN reducida tipo AlexNet)</li>
+              <li>Entrenamiento</li>
+              <li>Evaluación</li>
+            </ul>
+            <p>Estas métricas permiten comparar el desempeño de cada clasificador bajo las mismas condiciones experimentales.</p>
+          </li>
+        </ol>
+      </li>
+    </ol>
+
+    <h2 id="experimentos">Experimentos y Resultados (resumen)</h2>
+    <h3>1. Exploración</h3>
+    <p>Los artefactos de salida en nuestra exploración son la fuente directa de resultados: la tabla df_counts (class_counts_by_split.csv) resume el desbalance por split/clase; las figuras de histograma generadas a partir de size_counter documentan la dispersión de anchuras/alturas; y df_processed (part1_processed_files.csv) permite calcular la tasa de éxito del procesamiento y agrupar por split/class para obtener processed_counts_by_split.csv. </p>
+
+    <div class="figure">
+      <img src= "\proyecto-imagenes-medicas\resultados\exploracion\figures\scatter_entropy_before_after.png" />
+      <div class="caption">Ilustración 1. Entropía de las imagenes antes y despues de pre-procesadas.</div>
+    </div>
+
+    <!-- Tabla de validación -->
+    <h3>Resumen numérico de validación</h3>
+    <table id="validationTable">
+      <thead>
+        <tr>
+          <th>split</th>
+          <th>clase</th>
+          <th>n_images</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>test</td><td>NORMAL</td><td>234</td>
+        <tr><td>test</td><td>PNEUMONIA</td><td>390</td>
+        <tr><td>train</td><td>NORMAL</td><td>1341</td>
+        <tr><td>train</td><td>PNEUMONIA</td><td>3875</td>
+        <tr><td>validation</td><td>NORMAL</td><td>8</td>
+        <tr><td>validation</td><td>PNEUMONIA</td><td>8</td>
+      </tbody>
+    </table>
+
+    <p>A partir de los artefactos y métricas que usamos en el script  se derivan decisiones claras: si proc_counts muestra diferencias entre n_images y n_processed debemos priorizar la corrección de rutas/formatos o añadir manejo de excepciones para formatos raros; si los histogramas antes/después de CLAHE muestran saturación (áreas con 0 o 255 extendidos), reduce clipLimit (por ejemplo a 1.5) o aumenta tileGridSize (por ejemplo a (16,16)). Respecto al tamaño objetivo, aunque en el pipeline usamos size=(224,224) (válido para modelos pre-entrenados y ahorro de memoria), argumentamos que para radiografías puede ser preferible 512×512 o, mejor aún, mantener la relación de aspecto y aplicar padding (esto preserva información anatómica crítica y evita sesgos por deformación geométrica).</p>
+    
+    <canvas id="validationChart" style="max-width:100%; height:320px;"></canvas>
+
+    <h3>2. Descriptores de Forma</h3>    
+    <p>La extracción de descriptores de forma reveló que las radiografías de tórax poseen patrones estructurales consistentes, pero con variaciones suficientes para que los descriptores capturen información relevante. HOG ofrece un nivel de detalle muy alto y sensible a los bordes, ideal para detectar texturas o cambios producidos por neumonía. Los Momentos de Hu, aunque muy pequeños, reflejan características globales estables y permiten comparar formas independientemente del tamaño o la orientación. Finalmente, los descriptores geométricos del contorno complementan la representación describiendo la forma general del área segmentada.</p>
+
+    <div class="figure">
+      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <div class="caption">Ilustración 2. Algunos descriptores de forma sobre una imagen procesada.</div>
+    </div>
+
+    <p>El conjunto de resultados sugiere que ninguna de estas técnicas por sí sola representa completamente la complejidad de las radiografías, pero juntas construyen un espacio de características rico y diverso. Esto será especialmente valioso en la siguiente etapa de clasificación, donde se podrá evaluar qué combinación de descriptores facilita una mejor separación entre imágenes normales y patológicas.</p>
+
+    <h3>3. Descriptores de Textura</h3>
+    <p>La extracción de descriptores de textura (LBP, GLCM, Gabor y estadísticas de primer orden) permitió identificar diferencias cuantitativas claras entre las clases NORMAL y PNEUMONIA después del preprocesamiento aplicado.</p>
+
+    <p>Los histogramas de LBP mostraron que varios patrones locales son más frecuentes en las imágenes de neumonía, con incrementos visibles en bins de alta variabilidad. Por ejemplo, los descriptores lbp_4 y lbp_5 presentaron una media mayor en PNEUMONIA (≈0.26 y 0.17) frente a NORMAL (≈0.23 y 0.15), evidenciando texturas más irregulares.</p>
+    
+    <div class="figure">
+      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/matches_1_2.png" alt="Emparejamiento de características" />
+      <div class="caption">Ilustración 3. Histogramas de LBP.</div>
+    </div>
+
+    <p>En los descriptores GLCM, se evidenciaron diferencias aún más claras. Las distribuciones de contraste muestran valores más altos para la clase PNEUMONIA, tal como se observa en las curvas de densidad superpuestas, indicando mayor variación local de intensidades y presencia de estructuras poco homogéneas. A su vez, la energía y la homogeneidad presentan valores notablemente más altos en las imágenes normales, reflejando la mayor uniformidad y continuidad del tejido pulmonar sano. La correlación, aunque elevada en ambas clases, tiende a disminuir ligeramente en las imágenes afectadas, lo que también refuerza la pérdida de organización interna.</p>
+    
+    <p>Estas diferencias reflejan mayor desorden y pérdida de uniformidad en los pulmones afectados.</p>
+    <div class="figure">
+      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <div class="caption">Ilustración 4. Descriptores GLCM.</div>
+    </div>
+
+    <p>Los boxplots de filtros Gabor confirmaron esta tendencia. En varias orientaciones y frecuencias, las respuestas promedio (gabor_mean) fueron mayores en PNEUMONIA, con picos entre 800 y 1200 en los primeros filtros, mientras que en NORMAL se mantuvieron más bajas y con menor dispersión. Del mismo modo, las desviaciones estándar fueron consistentemente mayores en PNEUMONIA, indicando estructuras más complejas.</p>
+
+    <div class="figure">
+      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <div class="caption">Ilustración 5. Boxplots de filtros de Gabor</div>
+    </div>
+
+    <p>Las estadísticas de primer orden reforzaron los patrones anteriores:</p>
+    <ul>
+      <li>La varianza fue mayor en PNEUMONIA (≈ 3800–4500) que en NORMAL (≈ 3000–3600).</li>
+      <li>La entropía también aumentó (≈ 5.30 en PNEUMONIA vs ≈ 5.15 en NORMAL), alineada con una distribución más impredecible de intensidades.</li>
+    </ul>
+
+    <p>Finalmente, el mapa de correlación mostró que los descriptores LBP, GLCM, Gabor y los estadísticos globales no son redundantes: cada grupo captura propiedades distintas del tejido pulmonar, lo cual es valioso para la etapa de clasificación.</p>
+    
+     <div class="figure">
+      <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/panorama_registered_complete.png" alt="Registro de imagenes originales" />
+      <div class="caption">Ilustración 6. Heatmap entre descriptores.</div>
+    </div>
+    
+    
+    <h3 id="resultados">4. Clasificación de Imágenes</h3>
+    <h2>Modelos Clásicos de ML con descriptores de forma y Textura</h2>
+      <ul>
+        <li>Todos los modelos:
+          <p>Cada modelo fue entrenado bajo las mismas condiciones experimentales y evaluado mediante validación cruzada empleando métricas estándar como accuracy, precision, recall, F1-score y AUC-ROC. Esto permitió comparar el rendimiento de los clasificadores de manera objetiva y determinar cuáles ofrecían la mejor capacidad de discriminación entre las clases</p>
+          <p>En la tabla a continuación, se presenta el resumen de los resultados obtenidos para cada uno de los modelos evaluados. La tabla incluye tanto los valores promedio para cada métrica, lo que permite analizar no solo el desempeño sino también la estabilidad de los clasificadores.</p>
+          <table>
+            <thead>
+              <tr><th>Modelo</th><th>Accuracy</th><th>Presición</th><th>Recall</th><th>F1-score</th><th>AUC-ROC</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>SVM RBF</td><td>0.960721</td><td>0.967330</td><td>0.979270</td><td>0.973241</td><td>0.987996</td></tr>
+              <tr><td>SVM Lineal</td><td>0.945598</td><td>0.962887</td><td>0.962887</td><td>0.962732</td><td>0.983574</td></tr>
+              <tr><td>SVM Polinomial</td><td>0.963649</td><td>0.972133</td><td>0.978267</td><td>0.975162</td><td>0.990883</td></tr>
+              <tr><td>Random Forest</td><td>0.735057</td><td>0.733630</td><td>1.000000</td><td>0.846351</td><td>0.946740</td></tr>
+              <tr><td>k-NN</td><td>0.946815</td><td>0.962945</td><td>0.964226</td><td>0.963578</td><td>0.975744</td></tr>
+              <tr><td>Regresión Logística</td><td>0.948769</td><td>0.965874</td><td>0.963890</td><td>0.964853</td><td>0.984903</td></tr>
+            </tbody>
+          </table>
+          <p>Los modelos SVM fueron los que mostraron el mejor desempeño general. En particular, el SVM con kernel lineal y el SVM RBF alcanzaron las métricas más altas en accuracy, precisión y F1-score, indicando que los descriptores utilizados generan un espacio altamente discriminativo.</p>
+          <p>El SVM polinomial también obtuvo resultados competitivos, lo que sugiere que parte de la información es linealmente separable.</p>
+          <p>Modelos como K-NN y Regresión Logística presentaron un rendimiento estable, aunque ligeramente inferior al de las SVM.</p>
+          <p>Por el contrario, Random Forest obtuvo el desempeño más bajo, con alta tasa de falsos positivos, lo que evidencia dificultades para modelar correctamente las texturas y patrones capturados por los descriptores.</p>
+        </li>
+
+        <li>Mejores modelos:
+          <p>Después de identificar que los modelos con mejor rendimiento global fueron SVM RBF y SVM Lineal, se analizaron sus métricas finales y sus respectivas matrices de confusión con el fin de evaluar no solo el desempeño promedio, sino también el tipo de errores cometidos por cada clasificador.</p>
+        
+          <table>
+            <thead>
+              <tr><th>Métrica</th><th>SVM RBF</th><th>SVM Lineal</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Accuracy</td><td>0.9613</td><td>0.9624</td></tr>
+              <tr><td>Presición</td><td>0.9705</td><td>0.9735</td></tr>
+              <tr><td>Recall</td><td>0.9766</td><td>0.9750</td></tr>
+              <tr><td>F1-score</td><td>0.9736</td><td>0.9743</td></tr>
+              <tr><td>AUC-ROC</td><td>0.9914</td><td>0.9935</td></tr>
+            </tbody>
+          </table>
+
+          <p>Ambos modelos mostraron un rendimiento sobresaliente, con métricas muy similares. El SVM lineal presenta valores ligeramente superiores en accuracy, precisión, F1-score y AUC-ROC, lo cual indica una capacidad marginalmente mayor para distinguir correctamente entre ambas clases. Por su parte, el SVM RBF alcanzó el recall más alto, lo que significa que detectó una mayor proporción de casos positivos (PNEUMONIA), reduciendo los falsos negativos.</p>
+          <p>Estas diferencias mínimas sugieren que los descriptores utilizados generan un espacio de características altamente separable, lo que permite que incluso un clasificador lineal logre un rendimiento excelente.</p>
+        </li>
+
+        <li>Matrices de confusión:
+          <p>El SVM RBF muestra un desempeño sólido con una ligera tendencia a confundir algunos casos de NORMAL como PNEUMONIA (19 errores). Sin embargo, mantiene un número muy bajo de falsos negativos en la clase PNEUMONIA (15), lo cual es coherente con su recall superior. En aplicaciones clínicas, este comportamiento es positivo, ya que reduce la probabilidad de no detectar un caso real de neumonía.</p>
+           <div class="figure">
+              <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/measurements_overlay.png" alt="Algunas mediciones" />
+              <div class="caption">Ilustración 6. Matriz confusión del modelo SVM RBF.</div>
+            </div>
+            
+          <p>El SVM lineal muestra un comportamiento extremadamente similar al modelo RBF, aunque mejora ligeramente en la clasificación de la clase NORMAL (solo 17 errores). En PNEUMONIA, comete un error más que el RBF (16 vs. 15), lo cual es acorde con su recall ligeramente menor.</p>
+            <div class="figure">
+              <img src="QuantumViz_Vision-Computadora_02/Trabajo_02-Registro_Imagenes/results/figures/measurements_overlay.png" alt="Algunas mediciones" />
+              <div class="caption">Ilustración 7. Matriz confusión del modelo SVM Lineal.</div>
+            </div>
+        </li>
+      </ul>
+
+    <h2>Modelos de CNN</h2>
+    <p>Para evaluar el desempeño del modelo convolucional inspirado en AlexNet, se analizaron tanto el comportamiento durante el entrenamiento como los resultados obtenidos en el test set.</p>
+    <ul>
+      <li>Comportamiento del entrenamiento:
+        <p>Las curvas de pérdida y accuracy muestran una dinámica coherente con un entrenamiento estable:</p>
+        <ul>
+          <li>La pérdida de entrenamiento desciende de forma progresiva, pasando de ~0.28 a ~0.07, lo que indica una mejora constante en la capacidad del modelo para ajustarse a los datos.</li>
+          <li>La pérdida de validación, aunque presenta oscilaciones, se mantiene dentro de un rango cercano a la pérdida de entrenamiento, señal de que no existe sobreajuste severo.</li>
+          <li>La accuracy de entrenamiento aumenta hasta superar el 98%, mientras que la accuracy de validación se mantiene estable entre 92% y 95%.</li>
+        </ul>
+        <p>Estas curvas sugieren que la arquitectura fue capaz de aprender patrones discriminatorios sin sobre ajustar de forma exagerada, considerando el tamaño reducido de la red.</p>
+      </li>
+
+      <li>Resultados finales en el Test Set:
+        <p>El modelo CNN alcanzó las siguientes métricas:</p>
+        <table>
+            <thead>
+              <tr><th>Skill</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Accuracy</td><td>0.9499</td></tr>
+              <tr><td>Presición</td><td>0.9599</td></tr>
+              <tr><td>Recall</td><td>0.9719</td></tr>
+              <tr><td>F1-score</td><td>0.9658</td></tr>
+            </tbody>
+          </table>
+          <p>El desempeño global del modelo es alto y comparable al de los mejores clasificadores clásicos (SVM), lo cual demuestra que incluso una CNN reducida puede capturar adecuadamente las características visuales relevantes de las imágenes pulmonares.</p>
+      </li>
+
+      <li>Matriz de Confusión:
+        <p>La matriz de confusión del modelo CNN evidencia un desempeño sólido y equilibrado entre ambas clases, clasificando correctamente 212 imágenes de NORMAL y 623 de PNEUMONIA, aunque presenta 26 falsos positivos para PNEUMONIA y 18 falsos negativos para NORMAL.</p>
+        <p>El modelo mantiene un desempeño equilibrado en ambas clases, aunque tiende a cometer más falsos positivos en la clase NORMAL comparado con los clasificadores SVM. Sin embargo, conserva un recall alto en la clase PNEUMONIA, lo que es importante en aplicaciones clínicas donde es preferible minimizar los casos no detectados.</p>
+      </li>
+    </ul>
+
+    <h2 id="conclusiones">Conclusiones</h2>
+    <p>Los resultados obtenidos muestran que los modelos clásicos de machine learning basados en descriptores manuales pueden alcanzar un rendimiento muy alto en la clasificación de imágenes pulmonares. En particular, las variantes de SVM tanto con kernel RBF como lineal y polinomial lograron métricas superiores al 96% en accuracy y F1-score, lo que evidencia que los descriptores utilizados (HOG, LBP, GLCM y Gabor) generan un espacio de características altamente discriminativo. En contraste, otros algoritmos como k-NN y regresión logística mostraron un desempeño sólido pero ligeramente inferior, mientras que Random Forest presentó mayores dificultades para generalizar adecuadamente</p>
+    <p>La red neuronal convolucional también alcanzó un rendimiento competitivo, con métricas cercanas al 95% de accuracy y un F1-score superior al 96%. A diferencia de los métodos clásicos, la CNN aprende automáticamente las representaciones relevantes directamente de las imágenes, sin necesidad de diseñar manualmente descriptores. Esto le permite capturar patrones complejos que podrían no ser evidentes para los modelos tradicionales, aunque a costa de un mayor requerimiento computacional y tiempos de entrenamiento más extensos.</p>
+
+    <h2 id="contribucion">Análisis de contribución individual</h2>
+    <ul>
+      <li>Santiago Betancur Montoya: Análisis Exploratorio y Preprocesamiento, estructura del proyecto, cohesion y acoplamiento del codigo.</li>
+      <li>Monica Paola Vargas Tirado: Descriptores de Textura y redacciòn del informe.</li>
+      <li>Reinaldo David Lopez Narvaez: Clasificación con Descriptores Clásicos y redacciòn del informe.</li>
+      <li>Jose Sebastian Garzon Parra: Descriptores de Forma y redacciòn del informe.</li>
+    </ul>
+
+    <h2 id="referencias">Referencias</h2>
+    <ol>
+      <li>Chen, L., Rottensteiner, F., & Heipke, C. (2021). Feature detection and description for image matching: from hand-crafted design to deep learning. Geo-Spatial Information Science, 24(1), 58–74.</li>
+      <li>Liu, C., Xu, J., & Wang, F. (2021). A review of keypoints’ detection and feature description in image registration. Scientific Programming (Vol. 2021).</li>
+      <li>Liu, W., et al. (2021). A Review of Image feature descriptors in Visual positioning. CEUR Workshop.</li>
+      <li>Zhou, L., Wu, G., Zuo, Y., Chen, X., & Hu, H. (2024). A comprehensive review of vision-based 3D reconstruction methods. Sensors, 24(7).</li>
+    </ol>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+    let isCollapsed = false;
+
+    const toggleMenu = () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.toggle("active");
+      } else {
+        isCollapsed = !isCollapsed;
+        sidebar.classList.toggle("collapsed", isCollapsed);
+        main.classList.toggle("collapsed", isCollapsed);
+      }
+    };
+    menuBtn.addEventListener("click", toggleMenu);
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove("active");
+      }
+    });
+
+    // --- Gráfica de validación (Chart.js) ---
+    (function(){
+      const labels = ['Caso 1','Caso 2','Caso 3','Caso 4'];
+      const scaleGT = [1.00,1.02,0.95,1.15];
+      const scaleEst = [1.00,1.01,0.95,1.14];
+      const rotGT = [0,10,-12.5,25];
+      const rotEst = [0,9.95,-12.48,24.98];
+
+      const ctx = document.getElementById('validationChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Escala (GT)', data: scaleGT, tension:0.2 },
+            { label: 'Escala (Est.)', data: scaleEst, tension:0.2 },
+            { label: 'Rotación GT (°)', data: rotGT, tension:0.2, hidden:true },
+            { label: 'Rotación Est. (°)', data: rotEst, tension:0.2, hidden:true }
+          ]
+        },
+        options: {
+          responsive:true,
+          interaction:{ mode:'index', intersect:false },
+          plugins:{ legend:{ position:'top' }, title:{ display:true, text:'Validación: Escala y Rotación (GT vs Est.)' } },
+          scales: {
+            y: { beginAtZero:false }
+          }
+        }
+      });
+
+      // --- Gráfica de mediciones ---
+      const measureLabels = ['Cuadro','Mesa','Ventana','Silla','Planta'];
+      const measureMeters = [1.17,0.582,0.432,0.659,0.411];
+      const ctx2 = document.getElementById('measureChart').getContext('2d');
+      new Chart(ctx2, {
+        type:'bar',
+        data:{ labels:measureLabels, datasets:[{ label:'Medición (m)', data:measureMeters }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Mediciones estimadas en la panorámica (m)' } }, scales:{ y:{ beginAtZero:true } } }
+      });
+    })();
+  </script>
+</body>
+</html>
